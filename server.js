@@ -56,7 +56,7 @@ const PORT = process.env.PORT || 3111; // all caps because it is a variable futu
 // response: all the data from us + we can attach data to it + we can trigger a response to start with this parameter
 // response.send(<anything>) : takes the argument and sends it to the client
 app.get('/', (request, response) => {
-  response.send('you made it home, party time    ');
+  response.send('WELCOME TO CITY EXPLORER 9000');
 });
 
 // localhost:3333/pet-the-pet?name=ginger&quantity=3&lastName=carignan
@@ -65,29 +65,29 @@ app.get('/', (request, response) => {
 // this lives with all the client data, in the `request (req)` parameter
 // inside request will always live a property  query: { name: 'ginger', quantity: '3', lastName: 'carignan' },
 
-app.get('/pet-the-pet', (req, res) => {
-  console.log(req.query.name);
-  let str = '';
-  for(let i = 0; i < req.query.quantity; i++){
-    str += `petting ${req.query.name} ${req.query.lastName} </br>`;
-  }
-  res.send(str);
-});
+// app.get('/pet-the-pet', (req, res) => {
+//   console.log(req.query.name);
+//   let str = '';
+//   for(let i = 0; i < req.query.quantity; i++){
+//     str += `petting ${req.query.name} ${req.query.lastName} </br>`;
+//   }
+//   res.send(str);
+// });
 
 // localhost:3333/baked-goods?pie=apple&muffin=blueberry&price=$13.12
-app.get('/baked-goods', (req, res) => {
-  const pieTheyWant = req.query.pie; //?pie=apple === apple
-  const muffin = req.query.muffin; // === 'blueberry';
-  const price = req.query.price; // === '$13.12';
-  console.log(pieTheyWant, muffin, price);
-  res.send(pieTheyWant + muffin + price);
-});
+// app.get('/baked-goods', (req, res) => {
+//   const pieTheyWant = req.query.pie; //?pie=apple === apple
+//   const muffin = req.query.muffin; // === 'blueberry';
+//   const price = req.query.price; // === '$13.12';
+//   console.log(pieTheyWant, muffin, price);
+//   res.send(pieTheyWant + muffin + price);
+// });
 
 app.get('/location', (req, res) => { // route with endpoint of /location
-  if(req.query.city === 'newark'){
-    res.status(500).send('ew newark');
-    return;
-  }
+  // if(req.query.city === 'newark'){
+  //   res.status(500).send('ew newark');
+  //   return;
+  // }
 
 
   // we need to normalize our data with a constructor
@@ -95,7 +95,7 @@ app.get('/location', (req, res) => { // route with endpoint of /location
   const theDataObjFromJson = theDataArrayFromTheLocationJson[0];
 
   // data from the client (search query they submitted)
-  console.log('req.query', req.query);
+  // console.log('req.query', req.query);
   const searchedCity = req.query.city;
 
   const newLocation = new Location(

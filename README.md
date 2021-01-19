@@ -12,6 +12,7 @@
 
 [Repo](https://github.com/offgridauthor/301lab6-server)
 [Live Site](https://slw-301lab6.herokuapp.com/)
+[Front End](https://codefellows.github.io/code-301-guide/curriculum/city-explorer-app/front-end/)
 
 <!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
 
