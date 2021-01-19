@@ -84,10 +84,10 @@ app.get('/', (request, response) => {
 // });
 
 app.get('/location', (req, res) => { // route with endpoint of /location
-  // if(req.query.city === 'newark'){
-  //   res.status(500).send('ew newark');
-  //   return;
-  // }
+  if(req.query.city === ''){
+    res.status(500).send('ERROR 500');
+    return;
+  }
 
 
   // we need to normalize our data with a constructor
@@ -108,20 +108,34 @@ app.get('/location', (req, res) => { // route with endpoint of /location
   res.send(newLocation);
 });
 
-app.get('/restaurants', (req, res) => {
-  const data = require('./data/restaurants.json');
+// app.get('/restaurants', (req, res) => {
+//   const data = require('./data/restaurants.json');
+//   const arr = [];
+//   data.nearby_restaurants.forEach(jsonObj => {
+//     const restaurant = new Restaurant(jsonObj);
+//     arr.push(restaurant);
+//   });
+
+//   res.send(arr);
+// });
+
+app.get('/weather', (req, res) => {
+  if(req.query.city === ''){
+    res.status(500).send('ERROR 500');
+    return;
+  }
+  const data = require('./data/weather.json');
   const arr = [];
-  data.nearby_restaurants.forEach(jsonObj => {
-    const restaurant = new Restaurant(jsonObj);
-    arr.push(restaurant);
+  data.weather.forEach(jsonObj => {
+    const weather = new Weather(jsonObj);
+    arr.push(weather);
   });
 
-  res.send(arr);
 });
 
 // ==== Helper Functions ====
 
-function Location(search_query, formatted_query, latitude, longitude){
+function Location(search_query, formatted_query, latitude, longitude) {
   this.search_query = search_query;
   this.formatted_query = formatted_query;
   this.longitude = longitude;
@@ -129,12 +143,16 @@ function Location(search_query, formatted_query, latitude, longitude){
 }
 
 // arr[0] === jsonObj
-function Restaurant(jsonObj){
-  this.restaurant = jsonObj.restaurant.name;
-  this.locality = jsonObj.restaurant.location.locality_verbose;
-  this.cuisines = jsonObj.restaurant.cuisines;
-}
+// function Restaurant(jsonObj) {
+//   this.restaurant = jsonObj.restaurant.name;
+//   this.locality = jsonObj.restaurant.location.locality_verbose;
+//   this.cuisines = jsonObj.restaurant.cuisines;
+// }
 
+function Weather(jsonObj) {
+  this.temp = jsonObj.data.temp;
+  this.time = jsonObj.data.time;
+}
 
 
 // ==== Start the server ====

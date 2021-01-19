@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "temp": 100,
+      "time": "10:10"
+    }
+  ],
+  "city_name": "Seattle",
+  "lon": -122.33,
+  "timezone": "America\/Los_Angeles",
+  "lat": 47.61,
+  "country_code": "US",
+  "state_code": "WA"
+}
