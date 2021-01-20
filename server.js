@@ -1,111 +1,47 @@
 'use strict';
 
-/*
-================= Servers ====================
-A server needs to respond to information on the internet
-When information is sent on the internet it primarily uses http
-http is a way to encode data and send it in a uniform way so everyone can talk. Its like the alphabet of talking on the internet
-
-The job of talking over http, and especially listening for http requests is handled by Express
-It gets translated by express into javascript
-
-http requests contain a lot of info
-The basics are a lot like mail
-there is an address: url
-there is a to and a from  to: route, from: client url
-There can be a letter inside: encode information completely hidden in the response - like a letter in the envelope
-There can be info written on the outside of the letter - this is our queries - info on the visible url
-
-Express reads all of this for us and much more
-
-
-================ Environment  ===============
-A server has to run somewhere
-Heroku, AWS, terminal
-The server needs to run on a PORT on our local we use 3000, 3001, heroku tends to gravitate towards like 27000-32000, aws i have no clue
-There are settings our server has to pay attention to when it runs.
-We will create dynamic variables instead of hard coded ones that our server can read live.
-These variables make up / live in our environment
-not goDaddy (goDaddy is a dns, redirects to where it lives)
-*/
-
-// ========================== end theory ======================
-
 // ==== packages ====
-const express = require('express'); // implies that express has been downloaded via npm
-// the command to download it and save it is `npm install -S express`
-const cors = require('cors'); // Cross Origin Resource Sharing : allows connection between 2 local servers or websites : It can block or allow access to any list of urls. By default it allows localhost to talk itself
-// - needed this week only
-require('dotenv').config(); // runs once and loads all the environment variables IF they were declared in a file instead of the terminal
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+const superagent = require('superagent');
+// const { response } = require('express');
+// const { json } = require('express');
 
 // ==== setup the application (server) ====
-const app = express(); // creates a server from the express library
-app.use(cors()); // app.use loads middleware - we are loading cors so that requests don't get blocked when they are local
+const app = express();
+app.use(cors());
 
 // ==== other global variables ====
-const PORT = process.env.PORT || 3111; // all caps because it is a variable future devs should not touch
-// magic variables (other things rely on this variable)
-// process.env.PORT references the PORT env variable from my terminal
+const PORT = process.env.PORT || 3111;
 
 // ==== Routes ====
 
-// app.get : attaches a listener of method type GET to the server with a (route, and a callback)
-// '/' : route - we can visit the server at localhost:3000 or localhost:3000/ and trigger this callback
-// (request, response) => : the callback function, think of it ass (event) => on an event handler
-// request : all the data from the client
-// response: all the data from us + we can attach data to it + we can trigger a response to start with this parameter
-// response.send(<anything>) : takes the argument and sends it to the client
 app.get('/', (request, response) => {
-  response.send('WELCOME TO CITY EXPLORER 9000');
+  response.send('WELCOME TO CITY EXPLORER 9000 PREPARE FOR BE AMAZEWOW');
 });
 
-// localhost:3333/pet-the-pet?name=ginger&quantity=3&lastName=carignan
-// expect a key value pair of name:ginger and quantity:3
-// send `petting ginger carignan petting ginger petting ginger`
-// this lives with all the client data, in the `request (req)` parameter
-// inside request will always live a property  query: { name: 'ginger', quantity: '3', lastName: 'carignan' },
+app.get('/location', (req, res) => {
+  const locationQuery = req.query.city;
+  const key = process.env.GEOCODE_API_KEY;
+  const url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${locationQuery}&format=json`;
 
-// app.get('/pet-the-pet', (req, res) => {
-//   console.log(req.query.name);
-//   let str = '';
-//   for(let i = 0; i < req.query.quantity; i++){
-//     str += `petting ${req.query.name} ${req.query.lastName} </br>`;
-//   }
-//   res.send(str);
-// });
-
-// localhost:3333/baked-goods?pie=apple&muffin=blueberry&price=$13.12
-// app.get('/baked-goods', (req, res) => {
-//   const pieTheyWant = req.query.pie; //?pie=apple === apple
-//   const muffin = req.query.muffin; // === 'blueberry';
-//   const price = req.query.price; // === '$13.12';
-//   console.log(pieTheyWant, muffin, price);
-//   res.send(pieTheyWant + muffin + price);
-// });
-
-app.get('/location', (req, res) => { // route with endpoint of /location
-  if(req.query.city === ''){
-    res.status(500).send('ERROR 500');
-    return;
-  }
-
-
-  // we need to normalize our data with a constructor
-  const theDataArrayFromTheLocationJson = require('./data/location.json'); // require gets things from a fle
-  const theDataObjFromJson = theDataArrayFromTheLocationJson[0];
-
-  // data from the client (search query they submitted)
-  // console.log('req.query', req.query);
-  const searchedCity = req.query.city;
-
-  const newLocation = new Location(
-    searchedCity,
-    theDataObjFromJson.display_name,
-    theDataObjFromJson.lat,
-    theDataObjFromJson.lon
-  );
-
-  res.send(newLocation);
+  superagent.get(url)
+    .then(responseBack => {
+      console.log(responseBack.body);
+      const jsonData = responseBack.body[0];
+      const currentLocation = new Location(
+        locationQuery,
+        jsonData.display_name,
+        jsonData.lat,
+        jsonData.lon
+      );
+      res.send(currentLocation);
+    })
+    .catch(err => {
+      res.status(500).send('Error 500 : locationiq failed');
+      console.log(err.message);
+    });
 });
 
 // app.get('/restaurants', (req, res) => {
@@ -120,16 +56,24 @@ app.get('/location', (req, res) => { // route with endpoint of /location
 // });
 
 app.get('/weather', (req, res) => {
-  if(req.query.city === ''){
-    res.status(500).send('ERROR 500');
-    return;
-  }
-  const data = require('./data/weather.json');
-  const arr = [];
-  data.weather.forEach(jsonObj => {
-    const weather = new Weather(jsonObj);
-    arr.push(weather);
+  // if (req.query.city === 'organmeat') {
+  //   res.status(500).send('ERROR 500');
+  //   return;
+  // }
+  const weatherData = require('./data/weather.json');
+  const arr = []; //--- make .map
+  // data.weather.forEach(jsonObj => {
+  //   const weather = new Weather(jsonObj);
+  //   arr.push(weather);
+  // });
+  weatherData.data.map(weatherObj => {
+    // const forecast = weatherObj['weather']['description']; // could have been .weather.description equally
+    // const time = weatherObj.valid_date; // also 'ts' is js time notation
+    const newWeatherObj = new Weather(weatherObj);
+    arr.push(newWeatherObj);
   });
+  res.send(arr);
+
 
 });
 
@@ -149,20 +93,13 @@ function Location(search_query, formatted_query, latitude, longitude) {
 //   this.cuisines = jsonObj.restaurant.cuisines;
 // }
 
-function Weather(jsonObj) {
-  this.temp = jsonObj.data.temp;
-  this.time = jsonObj.data.time;
+function Weather(weatherObj) {
+  this.search_query = weatherObj.search_query;
+  this.precipitation = '300 gallons per second';
+  this.forecast = weatherObj['weather']['description'];
+  this.time = weatherObj.valid_date;
 }
-
 
 // ==== Start the server ====
 app.listen(PORT, () => console.log(`we are up on PORT ${PORT}`));
 
-
-// Steps for heroku
-// 1 create app
-// 2. upload your code to github
-// 3. connect github to heroku on heroku
-// 4. load the server by clicking deploy branch
-// 5. click open app in the top right to get the live url
-// 6. paste the url into the front end site and test it (remove the trailing /)
