@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3111;
 // ==== Routes ====
 
 app.get('/', (request, response) => {
-  response.send('WELCOME TO CITY EXPLORER 9000 PREPARE FOR BE AMAZEWOW');
+  response.send('Frontend here --> https://codefellows.github.io/code-301-guide/curriculum/city-explorer-app/front-end/');
 });
 
 app.get('/location', (req, res) => {
@@ -28,12 +28,17 @@ app.get('/location', (req, res) => {
     return;
   }
   const locationQuery = req.query.city;
+  // console.log(req.query.city);
   const locationKey = process.env.GEOCODE_API_KEY;
   const locationUrl = `https://us1.locationiq.com/v1/search.php?key=${locationKey}&q=${locationQuery}&format=json`;
   superagent.get(locationUrl)
     .then(locationResponse => {
-      console.log(locationResponse.body);
-      const currentLocation = new Location(locationResponse.body[0], locationQuery);
+      // console.log(locationResponse.body);
+      const currentLocation = new Location(locationResponse.body[0],locationQuery);
+      // console.log(currentLocation);
+      // console.log(locationResponse.body);
+      // console.log(locationResponse.body[0]);
+
       res.send(currentLocation);
     })
     .catch(err => {
@@ -65,16 +70,32 @@ app.get('/weather', (req, res) => {
       console.log(err.message);
     });
 });
+// app.get('/parks', (req, res) => {
+//   const parkCity = req.query.formatted_query;
+//   const parkKey = process.env.PARKS_API_KEY;
+//   const parkUrl = `https://developer.nps.gov/api/v1/parks?q=${parkCity}&limit=5&api_key=${parkKey}`;
+//   superagent.get(parkUrl)
+//     .then(parkRequest => {
+//       console.log(parkRequest.body);
+//       const parkArr = [];
+//       const parkData = parkRequest.body.data;
+//       parkData.map(obj => {
+//         parkArr.push(new Park(obj));
+
+//       });
+//       res.send(parkArr); // display first ten
+//     });
+// });
 
 
 
 // ==== Helper Functions ====
 
-function Location(search_query, formatted_query, latitude, longitude) {
+function Location(search_query, formatted_query, lat, lon) {
   this.search_query = search_query;
   this.formatted_query = formatted_query;
-  this.longitude = longitude;
-  this.latitude = latitude;
+  this.longitude = lon;
+  this.latitude = lat;
 }
 
 function Weather(weatherObj) {
@@ -84,7 +105,12 @@ function Weather(weatherObj) {
   this.time = weatherObj.valid_date;
 }
 
-
+// function Park(obj) {
+//   this.name = obj.name;
+//   this.addr = obj.address;
+//   this.fee = obj.fee;
+//   this.description = obj.description;
+// }
 
 // ==== Start the server ====
 app.listen(PORT, () => console.log(`running on PORT ${PORT}`));
