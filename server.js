@@ -34,12 +34,18 @@ app.get('/location', (req, res) => {
   superagent.get(locationUrl)
     .then(locationResponse => {
       // console.log(locationResponse.body);
-      const currentLocation = new Location(locationResponse.body[0],locationQuery);
+      const currentLocation = locationResponse.body[0];
+      const newLocation = new Location(
+        locationQuery,
+        currentLocation.display_name,
+        currentLocation.lat,
+        currentLocation.lon
+      );
       // console.log(currentLocation);
       // console.log(locationResponse.body);
       // console.log(locationResponse.body[0]);
 
-      res.send(currentLocation);
+      res.send(newLocation);
     })
     .catch(err => {
       res.status(500).send('Error 500 : locationiq failed');
