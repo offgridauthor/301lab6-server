@@ -22,20 +22,18 @@ app.get('/', (request, response) => {
 });
 
 app.get('/location', (req, res) => {
+  if (req.query.city === '') {
+    res.status(500).send('Error : Field empty / no data submitted');
+    console.log(status.message);
+    return;
+  }
   const locationQuery = req.query.city;
-  const key = process.env.GEOCODE_API_KEY;
-  const url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${locationQuery}&format=json`;
-
-  superagent.get(url)
-    .then(responseBack => {
-      console.log(responseBack.body);
-      const jsonData = responseBack.body[0];
-      const currentLocation = new Location(
-        locationQuery,
-        jsonData.display_name,
-        jsonData.lat,
-        jsonData.lon
-      );
+  const locationKey = process.env.GEOCODE_API_KEY;
+  const locationUrl = `https://us1.locationiq.com/v1/search.php?key=${locationKey}&q=${locationQuery}&format=json`;
+  superagent.get(locationUrl)
+    .then(locationResponse => {
+      console.log(locationResponse.body);
+      const currentLocation = new Location(locationResponse.body[0], locationQuery);
       res.send(currentLocation);
     })
     .catch(err => {
@@ -44,38 +42,31 @@ app.get('/location', (req, res) => {
     });
 });
 
-// app.get('/restaurants', (req, res) => {
-//   const data = require('./data/restaurants.json');
-//   const arr = [];
-//   data.nearby_restaurants.forEach(jsonObj => {
-//     const restaurant = new Restaurant(jsonObj);
-//     arr.push(restaurant);
-//   });
-
-//   res.send(arr);
-// });
-
+// --- weather ---
 app.get('/weather', (req, res) => {
-  // if (req.query.city === 'organmeat') {
-  //   res.status(500).send('ERROR 500');
-  //   return;
-  // }
-  const weatherData = require('./data/weather.json');
-  const arr = []; //--- make .map
-  // data.weather.forEach(jsonObj => {
-  //   const weather = new Weather(jsonObj);
-  //   arr.push(weather);
-  // });
-  weatherData.data.map(weatherObj => {
-    // const forecast = weatherObj['weather']['description']; // could have been .weather.description equally
-    // const time = weatherObj.valid_date; // also 'ts' is js time notation
-    const newWeatherObj = new Weather(weatherObj);
-    arr.push(newWeatherObj);
-  });
-  res.send(arr);
-
-
+  const weatherKey = process.env.WEATHER_API_KEY;
+  const lat = req.query.latitude;
+  const lon = req.query.longitude;
+  // const currentWeather = req.query.body; // probably horribly wrong----
+  const weatherUrl = `http://api.weatherbit.io/v2.0/current&key=${weatherKey}&lat=${lat}&lon=${lon}`; // how to get location data
+  superagent.get(weatherUrl)
+    .then(weatherRequest => {
+      // console.log(weatherRequest.body);
+      // const jsonData = weatherRequest.body[0];
+      const weatherArr = [];
+      const retrievedWeatherData = weatherRequest.body.data;
+      retrievedWeatherData.map(obj => {
+        weatherArr.push(new Weather(obj));
+      });
+      res.send(weatherArr);
+    })
+    .catch(err => {
+      res.status(500).send('Error 500 : there is no weather');
+      console.log(err.message);
+    });
 });
+
+
 
 // ==== Helper Functions ====
 
@@ -86,20 +77,15 @@ function Location(search_query, formatted_query, latitude, longitude) {
   this.latitude = latitude;
 }
 
-// arr[0] === jsonObj
-// function Restaurant(jsonObj) {
-//   this.restaurant = jsonObj.restaurant.name;
-//   this.locality = jsonObj.restaurant.location.locality_verbose;
-//   this.cuisines = jsonObj.restaurant.cuisines;
-// }
-
 function Weather(weatherObj) {
-  this.search_query = weatherObj.search_query;
-  this.precipitation = '300 gallons per second';
+  // this.search_query = weatherObj.search_query;
+  // this.precipitation = '300 gallons per second';
   this.forecast = weatherObj['weather']['description'];
   this.time = weatherObj.valid_date;
 }
 
+
+
 // ==== Start the server ====
-app.listen(PORT, () => console.log(`we are up on PORT ${PORT}`));
+app.listen(PORT, () => console.log(`running on PORT ${PORT}`));
 
