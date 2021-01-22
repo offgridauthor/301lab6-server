@@ -20,6 +20,8 @@ app.get('/', getFront);
 app.get('/location', getGpsCoordinates);
 app.get('/weather', getWeather);
 app.get('/parks', getParks);
+app.get('/movies', getMovies);
+app.get('/yelp', getYelp);
 
 
 function getFront(req, res) {
@@ -28,8 +30,9 @@ function getFront(req, res) {
 
 function getGpsCoordinates(req, res) {
   const city = req.query.city;
-  const key = process.env.GEOCODE_API_KEY;
-  const url = `https://us1.locationiq.com/v1/search.php?key=${key}&q=${city}&format=json`;
+  // console.log('THIS IS THE GPS REQ QUERY CITY = ', req.query.city);
+  const gkey = process.env.GEOCODE_API_KEY;
+  const url = `https://us1.locationiq.com/v1/search.php?key=${gkey}&q=${city}&format=json`;
   const sqlQuery = 'SELECT * FROM location WHERE search_query=$1';
   const sqlArray = [city];
   client.query(sqlQuery, sqlArray)
@@ -59,11 +62,11 @@ function getGpsCoordinates(req, res) {
 
 
 function getWeather(req, res) {
-  const key = process.env.WEATHER_API_KEY;
-  //  const city = req.query.search_query;
+  const wkey = process.env.WEATHER_API_KEY;
+  // const city = req.query.search_query;
   const longitude = req.query.latitude; // this is the same object as from location ("deterministic server call") --this information is in req.url---
   const latitude = req.query.latitude;
-  const url = `http://api.weatherbit.io/v2.0/current&key=${key}&lat=${latitude}&lon=${longitude}`;
+  const url = `http://api.weatherbit.io/v2.0/forecast/daily/current?days=8&key=${wkey}&lat=${latitude}&lon=${longitude}`;
   superagent.get(url)
     .then(result => {
       const arr = result.body.data.map(obj => {
@@ -75,27 +78,66 @@ function getWeather(req, res) {
     .catch(error => {
       console.error(error);
     });
-
-
-
 }
 
 function getParks(req, res) {
-  const parkCity = req.query.formatted_query;
+  const parkCity = req.query.search_query;
   const parkKey = process.env.PARKS_API_KEY;
   const parkUrl = `https://developer.nps.gov/api/v1/parks?q=${parkCity}&limit=10&api_key=${parkKey}`;
   superagent.get(parkUrl)
     .then(parkRequest => {
       //      console.log(parkRequest.body);
-      const parkArr = [];
       const parkData = parkRequest.body.data;
-      parkData.map(obj => {
-        parkArr.push(new Park(obj));
+      const parkArr = parkData.map(obj => {
+        const newObj = new Park(obj);
+        return newObj;
 
       });
       res.send(parkArr);
     });
-}/*  */
+}
+
+function getMovies(req, res) {
+  const query = req.query.search_query;
+  const mkey = process.env.MOVIE_API_KEY;
+  // console.log('---------------------------------', req.query);
+  // const url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&language=en-US&query=${query}`;
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${mkey}&language=en-US&query=${query}&page=1&include_adult=false`;
+  superagent.get(url)
+    .then(movieRequest => {
+      // console.log(movieRequest.body);
+      const movieData = movieRequest.body;
+      const movieArr = movieData.results.map(obj => { // maybe movieData.currentPage.results.map // currentPage = `page=${pagenu}`
+        const newObj = new Movie(obj);
+        return newObj;
+      });
+      res.send(movieArr);
+    })
+    .catch(error => {
+      console.error(error);
+    }); //Melancholy and loneliness, oppressed by its true misshapen and undefined form.
+}
+
+function getYelp(req, res) {
+  const city = req.query.search_query;
+  // console.log('THIS IS THE REQ QUERY CITY = ', req.query.city);
+  const ykey = process.env.RESTAURANT_API_KEY;
+  // const id = process.env.RESTAURANT_API_ID;
+  const page = req.query.page;
+  const offset = (page - 1) * 5;
+  const url = `https://api.yelp.com/v3/businesses/search?location=${city}&key=${ykey}&limit=5&offset=${offset}`; // add offset
+  superagent.get(url)
+    .set('Authorization', `Bearer ${ykey}`)
+    .then(request => {
+      // console.log(request.body);
+      const dat = request.body;
+      const arr = dat.businesses.map(obj => {
+        const newObj = new Yelp(obj);
+        return newObj;
+      });
+      res.send(arr);
+    });
+}
 
 function Location(city, obj) {
   this.search_query = city;
@@ -105,7 +147,7 @@ function Location(city, obj) {
 }
 
 function Weather(obj) {
-  this.weather = obj.weather.description;
+  this.forecast = obj.weather.description;
   this.time = obj.valid_date;
 }
 
@@ -117,5 +159,28 @@ function Park(obj) {
   this.description = obj.description;
 }
 
-client.connect();
-app.listen(PORT, () => console.log(`up on PORT: ${PORT}`));
+function Movie(obj) {
+  this.title = obj.original_title;
+  this.overview = obj.overview;
+  this.average_votes = obj.vote_average;
+  this.total_votes = obj.vote_count;
+  this.image_url = `https://image.tmdb.org/t/p/w500${obj.poster_path}`;
+  this.popularity = obj.popularity;
+  this.released_on = obj.release_date;
+}
+
+function Yelp(obj) {
+  this.name = obj.name;
+  this.image_url = obj.image_url;
+  this.price = obj.price;
+  this.rating = obj.rating;
+  this.url = obj.url;
+}
+
+client.connect()
+  .then(() => {
+    app.listen(PORT, () => console.log(`up on PORT: ${PORT}`));
+
+  })
+  .catch(error => console.error(error));
+
