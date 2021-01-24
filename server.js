@@ -81,7 +81,7 @@ function getWeather(req, res) {
 }
 
 function getParks(req, res) {
-  const parkCity = req.query.search_query;
+  const parkCity = req.query.search_query; // this gets a huge string of address data
   const parkKey = process.env.PARKS_API_KEY;
   const parkUrl = `https://developer.nps.gov/api/v1/parks?q=${parkCity}&limit=10&api_key=${parkKey}`;
   superagent.get(parkUrl)
@@ -100,14 +100,11 @@ function getParks(req, res) {
 function getMovies(req, res) {
   const query = req.query.search_query;
   const mkey = process.env.MOVIE_API_KEY;
-  // console.log('---------------------------------', req.query);
-  // const url = `https://api.themoviedb.org/3/search/movie?api_key=${key}&language=en-US&query=${query}`;
   const url = `https://api.themoviedb.org/3/search/movie?api_key=${mkey}&language=en-US&query=${query}&page=1&include_adult=false`;
   superagent.get(url)
     .then(movieRequest => {
-      // console.log(movieRequest.body);
       const movieData = movieRequest.body;
-      const movieArr = movieData.results.map(obj => { // maybe movieData.currentPage.results.map // currentPage = `page=${pagenu}`
+      const movieArr = movieData.results.map(obj => {
         const newObj = new Movie(obj);
         return newObj;
       });
@@ -115,21 +112,18 @@ function getMovies(req, res) {
     })
     .catch(error => {
       console.error(error);
-    }); //Melancholy and loneliness, oppressed by its true misshapen and undefined form.
+    });
 }
 
 function getYelp(req, res) {
   const city = req.query.search_query;
-  // console.log('THIS IS THE REQ QUERY CITY = ', req.query.city);
   const ykey = process.env.RESTAURANT_API_KEY;
-  // const id = process.env.RESTAURANT_API_ID;
   const page = req.query.page;
   const offset = (page - 1) * 5;
-  const url = `https://api.yelp.com/v3/businesses/search?location=${city}&key=${ykey}&limit=5&offset=${offset}`; // add offset
+  const url = `https://api.yelp.com/v3/businesses/search?location=${city}&key=${ykey}&limit=5&offset=${offset}`;
   superagent.get(url)
     .set('Authorization', `Bearer ${ykey}`)
     .then(request => {
-      // console.log(request.body);
       const dat = request.body;
       const arr = dat.businesses.map(obj => {
         const newObj = new Yelp(obj);
