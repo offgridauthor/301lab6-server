@@ -1,7 +1,7 @@
 # Project Name
 
 **Author**: Stephen Webber
-**Version**: 1.0.0 (increment the patch/fix version number if you make more commits past your first submission)
+**Version**: 1.0.0
 
 ## Overview
 <!-- Provide a high level overview of what this application is and why you are building it, beyond the fact that it's an assignment for this class. (i.e. What's your problem domain?) -->
@@ -9,15 +9,15 @@
 Building a stand-alone back end to interact with a static front-end. Data is requested from six third party APIs and is sent to client's browser. Data is persisted using SQL database.
 
 
-[Link to Public Trello Board](https://trello.com/b/gT95dxpq/cityexplorer)
+- [Link to Public Trello Board](https://trello.com/b/gT95dxpq/cityexplorer)
 
 ## Getting Started
 
-[Repo](https://github.com/offgridauthor/301lab6-server)
+- [Repo](https://github.com/offgridauthor/301lab6-server)
 
-[Live Site](https://slw-301lab6.herokuapp.com/)
+- [Live Site](https://slw-301lab6.herokuapp.com/)
 
-[Front End](https://codefellows.github.io/code-301-guide/curriculum/city-explorer-app/front-end/)
+- [Front End](https://codefellows.github.io/code-301-guide/curriculum/city-explorer-app/front-end/)
 
 <!-- What are the steps that a user must take in order to build this app on their own machine and get it running? -->
 
@@ -26,16 +26,16 @@ Building a stand-alone back end to interact with a static front-end. Data is req
 
 *Dependencies*
 
-`npm install -S cors dotenv express pg superagent`
+- `npm install -S cors dotenv express pg superagent`
 
-`psql -d cityexplorer schema.sql`
+- `psql -d cityexplorer schema.sql`
 
-Dotenv must contain: 
+- Dotenv must contain: 
 
-`GEOCODE_API_KEY` 
-`WEATHER_API_KEY` from weatherbit.io
-`PARKS_API_KEY` from nps.gov
-`DATABASE_URL` to postgres `cityexplorer` db
+- `GEOCODE_API_KEY` 
+- `WEATHER_API_KEY` from weatherbit.io
+- `PARKS_API_KEY` from nps.gov
+- `DATABASE_URL` to postgres `cityexplorer` db
 
 ## Change Log
 <!-- Use this area to document the iterative changes made to your application as each feature is successfully implemented. Use time stamps. Here's an examples:
