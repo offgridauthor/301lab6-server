@@ -1,6 +1,7 @@
-# Project Name
+# CITY EXPLORER API
 
 **Author**: Stephen Webber
+
 **Version**: 1.0.0
 
 ## Overview
@@ -13,9 +14,9 @@ Building a stand-alone back end to interact with a static front-end. Data is req
 
 ## Getting Started
 
-- [Repo](https://github.com/offgridauthor/301lab6-server)
+- [Github Repo](https://github.com/offgridauthor/301lab6-server)
 
-- [Live Site](https://slw-301lab6.herokuapp.com/)
+- [Heroku Backend](https://slw-301lab6.herokuapp.com/)
 
 - [Front End](https://codefellows.github.io/code-301-guide/curriculum/city-explorer-app/front-end/)
 
@@ -43,7 +44,9 @@ Building a stand-alone back end to interact with a static front-end. Data is req
 01-01-2001 4:59pm - Application now has a fully-functional express server, with a GET route for the location resource.-->
 
 1/18 - Built API server for City Explorer app.
+
 1/19 - API Data for location, weather, and NPS functional
+
 1/20 - Added movies and restaurants
 
 ### Lab 6 - Node, npm, and express
